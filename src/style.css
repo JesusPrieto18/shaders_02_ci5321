@@ -1,0 +1,23 @@
+/* Configuración para toda la página */
+:root {
+  font-family: Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* El overflow hidden es vital para evitar barras de desplazamiento */
+  overflow: hidden; 
+  background-color: #000000;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Configuración del lienzo */
+canvas {
+  display: block; /* Elimina el espacio extra inferior de los elementos inline */
+  width: 100vw;
+  height: 100vh;
+}
