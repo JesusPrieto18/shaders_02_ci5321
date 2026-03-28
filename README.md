@@ -1,4 +1,4 @@
-# Proyecto Shaders 01 CI5321
+# Proyecto Shaders 02 CI5321
 
 Este proyecto es una base para experimentar con shaders personalizados usando Three.js y TypeScript. Permite crear modelos 3D, aplicar diferentes tipos de shaders (vertex y fragment), y controlar parámetros visuales desde una interfaz gráfica.
 

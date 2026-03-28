@@ -8,14 +8,14 @@ export let controls: OrbitControls;
 
 export function config() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0.5, 0.5, 0.5);
+    scene.background = new THREE.Color(0x000000);
     camera = new THREE.PerspectiveCamera(
-    75,                                     // FOV: Campo de visión en grados (vertical)
-    window.innerWidth / window.innerHeight, // Aspect Ratio: Proporción de la pantalla
-    0.1,                                    // Near: Lo más cerca que la cámara puede "ver"
-    1000                                    // Far: Lo más lejos que la cámara puede "ver"
+        75,                                     // FOV: Campo de visión en grados (vertical)
+        window.innerWidth / window.innerHeight, // Aspect Ratio: Proporción de la pantalla
+        0.1,                                    // Near: Lo más cerca que la cámara puede "ver"
+        1000                                    // Far: Lo más lejos que la cámara puede "ver"
     );
-    camera.position.z = 5;
+    camera.position.z = 20;
 
     const canvas = document.querySelector('#c');
     if (!(canvas instanceof HTMLCanvasElement)) {
@@ -30,7 +30,7 @@ export function config() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.05; 
     controls.minDistance = 2;
-    controls.maxDistance = 20;
+    controls.maxDistance = 50;
 
     //const luz = new THREE.DirectionalLight(0xffffff, 1);
     //luz.position.set(2, 2, 5);
