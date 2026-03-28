@@ -89,23 +89,27 @@ export function TornadoParticles(name: string) {
     
     
     const positions = new Float32Array(particleCount * 3);
+    const randomness = new Float32Array(particleCount * 3);
 
     for(let i = 0; i < particleCount; i++) {
-        // Columna 1: RADIO (Distancia desde el centro)
-        // Usamos Math.random() para distribuirlas, evitando que el radio sea exactamente 0
-        positions[i * 3 + 0] = Math.random() * 2.0 + 0.1; 
-        
-        // Columna 2: ALTURA (Posición vertical)
-        // Las distribuimos aleatoriamente desde el suelo (0) hasta la altura máxima (ej. 10)
+        // 1. POSICIONES
+        // TRUCO PRO: Al usar Math.sqrt() en el radio, las partículas se distribuyen 
+        // uniformemente en el área del círculo en lugar de agruparse en el centro.
+        // Aquí solo guardamos un porcentaje del radio (0.0 a 1.0)
+        positions[i * 3 + 0] = Math.sqrt(Math.random()); 
         positions[i * 3 + 1] = Math.random() * 10.0; 
-        
-        // Columna 3: ÁNGULO (En radianes)
-        // Un círculo completo tiene 2 * PI radianes (360 grados)
         positions[i * 3 + 2] = Math.random() * Math.PI * 2.0; 
+
+        // 2. CAOS (Randomness)
+        // Generamos un vector 3D aleatorio entre -1.0 y 1.0 para cada partícula
+        randomness[i * 3 + 0] = (Math.random() - 0.5) * 2.0; // Desfase en X
+        randomness[i * 3 + 1] = (Math.random() - 0.5) * 2.0; // Desfase en Y
+        randomness[i * 3 + 2] = (Math.random() - 0.5) * 2.0; // Desfase en Z
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomness, 3));
 
     const material = new THREE.RawShaderMaterial({
         vertexShader: vs,
@@ -124,7 +128,11 @@ export function TornadoParticles(name: string) {
             uSize: { value: 8.0 },
             uSpeed: { value: 3.0 },
             uUpSpeed: { value: 1.5 },
-            uMaxHeight: { value: 10.0 }
+            uMaxHeight: { value: 10.0 },
+        
+            uRadiusBottom: { value: 1.0 },
+            uRadiusTop: { value: 5.0 },
+            uTurbulence: { value: 1.5 } // Qué tan fuerte es el caos
         }
     });
 
@@ -137,6 +145,9 @@ export function TornadoParticles(name: string) {
         colorObject: '#00ffff',
         size: 8.0,
         speed: 3.0,
-        upSpeed: 1.5
+        upSpeed: 1.5,
+        radiusBottom: 1.0,
+        radiusTop: 5.0,
+        turbulence: 1.5
     });
 }

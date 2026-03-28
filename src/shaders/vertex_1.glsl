@@ -1,6 +1,7 @@
 precision highp float;
 
-in vec3 position; // x = Radio, y = Altura, z = Ángulo
+in vec3 position; 
+in vec3 aRandomness; // Recibimos el vector de caos único de esta partícula
 
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
@@ -12,42 +13,48 @@ uniform float uSpeed;
 uniform float uUpSpeed;
 uniform float uMaxHeight;
 
-out float vLife; // Se lo pasamos al fragment para difuminar las partículas
+// Los nuevos Uniforms
+uniform float uRadiusBottom;
+uniform float uRadiusTop;
+uniform float uTurbulence;
+
+out float vLife; 
 
 void main() {
-    float radius = position.x;
+    float normRadius = position.x; // Viene como un porcentaje de 0.0 a 1.0
     float height = position.y;
     float angle = position.z;
 
-    // --- FÍSICA DEL TORNADO ---
-    
-    // 1. Ascenso infinito: Hacemos que la altura suba con el tiempo.
-    // mod(x, y) reinicia la partícula al suelo cuando alcanza 'uMaxHeight'
+    // Altura actual cíclica
     float currentHeight = mod(height + (uTime * uUpSpeed), uMaxHeight);
+    
+    // Porcentaje de altura (0.0 en el piso, 1.0 en la cima)
+    float heightPercent = currentHeight / uMaxHeight;
 
-    // 2. Rotación dinámica: Sumamos tiempo al ángulo.
-    // Dividir entre el radio hace que el centro gire más rápido (física de vórtices real)
-    float currentAngle = angle + (uTime * uSpeed) / (radius + 0.5);
+    // --- 1. EL RADIO DINÁMICO ---
+    // mix(A, B, porcentaje) mezcla linealmente entre el radio inferior y superior
+    float currentMaxRadius = mix(uRadiusBottom, uRadiusTop, heightPercent);
+    
+    // El radio final es el porcentaje aleatorio de la partícula por el radio de esa altura
+    float finalRadius = normRadius * currentMaxRadius;
 
-    // 3. El Embudo: Multiplicamos el radio por la altura actual.
-    // Entre más alta esté la partícula, más ancho es el círculo que describe.
-    float funnelRadius = radius * (1.0 + currentHeight * 0.3);
+    // --- 2. ROTACIÓN DENTRO DEL EMBUDO ---
+    float currentAngle = angle + (uTime * uSpeed) / (finalRadius + 0.1); 
 
-    // --- CONVERSIÓN DE POLAR A CARTESIANA (X, Y, Z reales) ---
     vec3 realPosition;
-    realPosition.x = funnelRadius * cos(currentAngle);
+    realPosition.x = finalRadius * cos(currentAngle);
     realPosition.y = currentHeight;
-    realPosition.z = funnelRadius * sin(currentAngle);
+    realPosition.z = finalRadius * sin(currentAngle);
 
-    // --- ESTILIZACIÓN ---
-    // Calculamos una "vida" basada en una onda de seno (0 en el suelo, 1 en el medio, 0 en la cima)
-    // Esto hace que las partículas no aparezcan o desaparezcan de golpe.
-    vLife = sin((currentHeight / uMaxHeight) * 3.14159);
+    // --- 3. APLICAR TURBULENCIA (El Caos) ---
+    // Multiplicamos por 'heightPercent' para que la base del tornado sea apretada y estable,
+    // pero se vuelva caótica y desordenada a medida que sube.
+    realPosition += aRandomness * uTurbulence * heightPercent;
+
+    vLife = sin(heightPercent * 3.14159);
 
     vec4 worldPosition = modelMatrix * vec4(realPosition, 1.0);
     gl_Position = projectionMatrix * viewMatrix * worldPosition;
 
-    // gl_PointSize es una variable nativa de GLSL. 
-    // Lo escalamos por 'gl_Position.w' para que las partículas se vean más pequeñas de lejos.
     gl_PointSize = uSize * (15.0 / gl_Position.w) * vLife; 
 }

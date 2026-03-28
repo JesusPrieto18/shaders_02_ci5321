@@ -29,7 +29,7 @@ export class ModelsMesh<T extends AllModels> {
     } else {
         this.mesh = geometry; // Si es un Group o Points, lo usamos directamente
     }
-    
+
     this.fileGUI = gui.addFolder(this.name);
   }
 
@@ -74,7 +74,7 @@ export class TornadoModel extends ModelsMesh<Tornado> {
   protected buildGUI(): void {
 
     this.fileGUI.addColor(this.parameters, 'colorObject').name("Color").onChange((nuevoHex: ColorHex) => {
-      this.shader.uniforms.uObjectColor.value.set(nuevoHex);
+      this.shader.uniforms.uColor.value.set(nuevoHex);
     });
 
     this.fileGUI.add(this.parameters, 'scale', 0.1, 5.0).name('Escala Global').onChange((v: number) => {
@@ -92,6 +92,17 @@ export class TornadoModel extends ModelsMesh<Tornado> {
 
     this.fileGUI.add(this.parameters, 'upSpeed', 0.1, 10.0).name('Velocidad de Ascenso').onChange((v: number) => {
         this.shader.uniforms.uUpSpeed.value = v; // ¡Actualizamos la GPU!
+    });
+
+    const carpetaForma = this.fileGUI.addFolder('Forma del Tornado');
+    carpetaForma.add(this.parameters, 'radiusBottom', 0.0, 5.0).name('Radio Inferior').onChange((v: number) => {
+        this.shader.uniforms.uRadiusBottom.value = v;
+    });
+    carpetaForma.add(this.parameters, 'radiusTop', 1.0, 15.0).name('Radio Superior').onChange((v: number) => {
+        this.shader.uniforms.uRadiusTop.value = v;
+    });
+    carpetaForma.add(this.parameters, 'turbulence', 0.0, 5.0).name('Turbulencia (Caos)').onChange((v: number) => {
+        this.shader.uniforms.uTurbulence.value = v;
     });
 
     console.log('Construyendo modelo tipo tornado');
