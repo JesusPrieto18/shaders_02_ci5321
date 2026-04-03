@@ -196,9 +196,9 @@ export function ExplosionParticles(name: string) {
             uTime: { value: 0.0 }, // El motor que mueve todo
             uColor: { value: new THREE.Color('#ff6600') }, // Naranja brillante para el centro
             uSize: { value: 5.0 },
-            uExplosionForce: { value: 5.0 },
-            uOscillationSpeed: { value: 0.1 },
-            uGravity: { value: 0.0 },
+            uExplosionForce: { value: 1.0 },
+            uOscillationSpeed: { value: 0.2 },
+            uGravity: { value: 9.8 },
         }
     });
 
@@ -209,9 +209,9 @@ export function ExplosionParticles(name: string) {
         scale: 1,
         colorObject: '#ff6600',
         size: 5.0,
-        explosionForce: 5.0,
-        oscillationSpeed: 0.1,
-        gravity: 0,
+        explosionForce: 1.0,
+        oscillationSpeed: 0.2,
+        gravity: 9.8,
 
     });
 };

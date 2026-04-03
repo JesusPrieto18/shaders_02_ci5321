@@ -131,7 +131,7 @@ export class ExplosionModel extends ModelsMesh<Explosion> {
     carpetaForma.add(this.parameters, 'explosionForce', 1.0, 5.0).name('Fuerza de Explosión').onChange((v: number) => {
         this.shader.uniforms.uExplosionForce.value = v; // ¡Actualizamos la GPU!
     });
-carpetaForma.add(this.parameters, 'oscillationSpeed', { Lento: 0.1, Rápido: 1.0 })
+carpetaForma.add(this.parameters, 'oscillationSpeed', { Lento: 0.2, Rápido: 1.0 })
     .name('Velocidad')
     .onChange((valor: number) => {
         // Actualizamos el uniform del shader
