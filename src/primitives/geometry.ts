@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import vs from '../shaders/vertex_1.glsl?raw';
 import fs from '../shaders/fragment_1.glsl?raw';
+import vse from '../shaders/vertex_explosion.glsl?raw';
+import fse from '../shaders/fragment_explosion.glsl?raw';
 import { camera } from '../config/config';
 import { addModel } from './modelsMesh';
 
@@ -150,4 +152,66 @@ export function TornadoParticles(name: string) {
         radiusTop: 5.0,
         turbulence: 1.5
     });
-}
+};
+
+export function ExplosionParticles(name: string) {
+    const particleCount = 5000; // ¡50 mil partículas de un solo golpe!
+    
+    const positions = new Float32Array(particleCount * 3);
+    const randomness = new Float32Array(particleCount * 3);
+
+    for(let i = 0; i < particleCount; i++) {
+        // 1. POSICIONES
+        // Aquí el radio se distribuye uniformemente en la esfera usando Math.cbrt() para el efecto de explosión
+        const radius = Math.cbrt(Math.random()) * 5.0; // Radio máximo de 5 unidades
+        const theta = Math.random() * Math.PI * 2.0; // Ángulo horizontal
+        const phi = Math.acos(2.0 * Math.random() - 1.0); // Ángulo vertical (distribución esférica)
+
+        positions[i * 3 + 0] = radius * Math.sin(phi) * Math.cos(theta); // X
+        positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta); // Y
+        positions[i * 3 + 2] = radius * Math.cos(phi); // Z
+
+        // 2. CAOS (Randomness)
+        randomness[i * 3 + 0] = (Math.random() - 0.5) * 2.0; // Desfase en X
+        randomness[i * 3 + 1] = (Math.random() - 0.5) * 2.0; // Desfase en Y
+        randomness[i * 3 + 2] = (Math.random() - 0.5) * 2.0; // Desfase en Z
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomness, 3));
+
+    const material = new THREE.RawShaderMaterial({
+        vertexShader: vse,
+        fragmentShader: fse,
+        glslVersion: THREE.GLSL3,
+        transparent: true,
+        depthWrite: false, // Evita que las partículas bloqueen a las que están detrás
+        blending: THREE.AdditiveBlending, // Las luces de las partículas se suman, creando brillos
+        uniforms: {
+            projectionMatrix: { value: camera.projectionMatrix },
+            viewMatrix: { value: camera.matrixWorldInverse },
+            modelMatrix: { value: new THREE.Matrix4() }, // Se enlazará en ModelsMesh
+            
+            uTime: { value: 0.0 }, // El motor que mueve todo
+            uColor: { value: new THREE.Color('#ff6600') }, // Naranja brillante para el centro
+            uSize: { value: 5.0 },
+            uExplosionForce: { value: 5.0 },
+            uOscillationSpeed: { value: 0.1 },
+            uGravity: { value: 0.0 },
+        }
+    });
+
+    const particles = new THREE.Points(geometry, material);
+    
+    addModel(name, particles, material, {
+        type: 'explosion',
+        scale: 1,
+        colorObject: '#ff6600',
+        size: 5.0,
+        explosionForce: 5.0,
+        oscillationSpeed: 0.1,
+        gravity: 0,
+
+    });
+};
