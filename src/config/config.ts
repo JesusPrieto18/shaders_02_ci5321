@@ -16,6 +16,7 @@ export function config() {
         1000                                    // Far: Lo más lejos que la cámara puede "ver"
     );
     camera.position.z = 20;
+    camera.position.y = 20;
 
     const canvas = document.querySelector('#c');
     if (!(canvas instanceof HTMLCanvasElement)) {
