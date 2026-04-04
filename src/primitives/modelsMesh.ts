@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import GUI from 'lil-gui';
 import { scene } from '../config/config';
-import {AllModels, ColorHex, Tornado} from './models';
+import {AllModels, ColorHex, Tornado, Explosion} from './models';
 
 const gui = new GUI();
 gui.title('Controles del Modelo');
@@ -109,6 +109,40 @@ export class TornadoModel extends ModelsMesh<Tornado> {
   }
 }
 
+export class ExplosionModel extends ModelsMesh<Explosion> {
+  constructor(name: string, geometry: THREE.BufferGeometry | THREE.Group, shader: THREE.RawShaderMaterial, params: Explosion) {
+    super(name, geometry, shader, params);
+    this.mesh.name = "explosion"
+    this.buildGUI();
+  }
+  protected buildGUI(): void {
+    this.fileGUI.addColor(this.parameters, 'colorObject').name("Color").onChange((nuevoHex: ColorHex) => {
+      this.shader.uniforms.uColor.value.set(nuevoHex);
+    });
+    this.fileGUI.add(this.parameters, 'scale', 0.1, 5.0).name('Escala Global').onChange((v: number) => {
+      // scale.set(x, y, z) escala uniformemente en todos los ejes
+      this.mesh.scale.set(v, v, v);
+    });
+    this.fileGUI.add(this.parameters, 'size', 0.1, 5.0).name('Tamaño de Partícula').onChange((v: number) => {
+        this.shader.uniforms.uSize.value = v; // ¡Actualizamos la GPU!
+    });
+    const carpetaForma = this.fileGUI.addFolder('Parametros Explosión');
+
+    carpetaForma.add(this.parameters, 'explosionForce', 1.0, 5.0).name('Fuerza de Explosión').onChange((v: number) => {
+        this.shader.uniforms.uExplosionForce.value = v; // ¡Actualizamos la GPU!
+    });
+carpetaForma.add(this.parameters, 'oscillationSpeed', { Lento: 0.2, Rápido: 1.0 })
+    .name('Velocidad')
+    .onChange((valor: number) => {
+        // Actualizamos el uniform del shader
+        this.shader.uniforms.uOscillationSpeed.value = valor;
+    });
+carpetaForma.add(this.parameters, 'gravity', 0.0, 9.8).name('Gravedad').onChange((v: number) => {
+        this.shader.uniforms.uGravity.value = v; // ¡Actualizamos la GPU!
+    });
+
+    console.log('Construyendo modelo tipo explosión');
+};}
 /** 
 export class ShockToonModel extends ModelsMesh<ShockToon> {
   constructor(name: string, geometry: THREE.BufferGeometry | THREE.Group, shader: THREE.RawShaderMaterial, params: ShockToon) {
@@ -208,7 +242,11 @@ export function addModel(nombre: string, geometria: THREE.BufferGeometry  | THRE
 
   if (parametros.type === 'tornado') {
     model = new TornadoModel(nombre, geometria, shader, parametros);
-  } else {
+  }
+  else if (parametros.type === 'explosion') {
+    model = new ExplosionModel(nombre, geometria, shader, parametros);
+  }
+  else {
     throw new Error("Tipo de modelo no soportado");
   }
 

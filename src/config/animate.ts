@@ -17,7 +17,7 @@ export function animate(time: number) {
     scene.traverse((child) => {
         if (child instanceof THREE.Points) {
             if (child.material instanceof THREE.RawShaderMaterial) {
-                if (child.name === "tornado") {
+                if (child.name === "tornado" || child.name === "explosion") {
                     child.material.uniforms.uTime.value = time * 0.001;
                 }
             }
